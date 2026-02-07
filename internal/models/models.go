@@ -99,12 +99,12 @@ type OsdConfig struct {
 }
 
 type AudioConfig struct {
-	Enabled      bool   `yaml:"enabled"`
-	Volume       int    `yaml:"volume"`
-	Srate        int    `yaml:"srate"`
-	Codec        string `yaml:"codec"`
-	OutputEnabled bool  `yaml:"outputEnabled"`
-	OutputVolume int    `yaml:"outputVolume"`
+	Enabled       bool   `yaml:"enabled"`
+	Volume        int    `yaml:"volume"`
+	Srate         int    `yaml:"srate"`
+	Codec         string `yaml:"codec"`
+	OutputEnabled bool   `yaml:"outputEnabled"`
+	OutputVolume  int    `yaml:"outputVolume"`
 }
 
 type RtspConfig struct {
@@ -155,46 +155,46 @@ type FpvConfig struct {
 
 // AlinkConfig represents the structure of /etc/alink.conf
 type AlinkConfig struct {
-	AllowSetPower            bool    `conf:"allow_set_power"`
-	Use0To4TxPower           bool    `conf:"use_0_to_4_txpower"`
-	PowerLevel0To4           int     `conf:"power_level_0_to_4"`
-	GetCardInfoFromYaml      bool    `conf:"get_card_info_from_yaml"`
-	RssiWeight               float64 `conf:"rssi_weight"`
-	SnrWeight                float64 `conf:"snr_weight"`
-	FallbackMs               int     `conf:"fallback_ms"`
-	HoldFallbackModeS        int     `conf:"hold_fallback_mode_s"`
-	MinBetweenChangesMs      int     `conf:"min_between_changes_ms"`
-	HoldModesDownS           int     `conf:"hold_modes_down_s"`
-	HysteresisPercent        int     `conf:"hysteresis_percent"`
-	HysteresisPercentDown    int     `conf:"hysteresis_percent_down"`
-	ExpSmoothingFactor       float64 `conf:"exp_smoothing_factor"`
-	ExpSmoothingFactorDown   float64 `conf:"exp_smoothing_factor_down"`
-	AllowRequestKeyframe     bool    `conf:"allow_request_keyframe"`
-	AllowRqKfByTxD           bool    `conf:"allow_rq_kf_by_tx_d"`
-	CheckXtxPeriodMs         int     `conf:"check_xtx_period_ms"`
-	RequestKeyframeIntervalMs int    `conf:"request_keyframe_interval_ms"`
-	IdrEveryChange           bool    `conf:"idr_every_change"`
-	RoiFocusMode             int     `conf:"roi_focus_mode"`
-	AllowDynamicFec          bool    `conf:"allow_dynamic_fec"`
-	FecKAdjust               int     `conf:"fec_k_adjust"`
-	SpikeFixDynamicFec       bool    `conf:"spike_fix_dynamic_fec"`
-	AllowSpikeFixFps         bool    `conf:"allow_spike_fix_fps"`
-	AllowXtxReduceBitrate    bool    `conf:"allow_xtx_reduce_bitrate"`
-	XtxReduceBitrateFactor   float64 `conf:"xtx_reduce_bitrate_factor"`
-	OsdLevel                 int     `conf:"osd_level"`
-	MultiplyFontSizeBy       int     `conf:"multiply_font_size_by"`
-	
+	AllowSetPower             bool    `conf:"allow_set_power"`
+	Use0To4TxPower            bool    `conf:"use_0_to_4_txpower"`
+	PowerLevel0To4            int     `conf:"power_level_0_to_4"`
+	GetCardInfoFromYaml       bool    `conf:"get_card_info_from_yaml"`
+	RssiWeight                float64 `conf:"rssi_weight"`
+	SnrWeight                 float64 `conf:"snr_weight"`
+	FallbackMs                int     `conf:"fallback_ms"`
+	HoldFallbackModeS         int     `conf:"hold_fallback_mode_s"`
+	MinBetweenChangesMs       int     `conf:"min_between_changes_ms"`
+	HoldModesDownS            int     `conf:"hold_modes_down_s"`
+	HysteresisPercent         int     `conf:"hysteresis_percent"`
+	HysteresisPercentDown     int     `conf:"hysteresis_percent_down"`
+	ExpSmoothingFactor        float64 `conf:"exp_smoothing_factor"`
+	ExpSmoothingFactorDown    float64 `conf:"exp_smoothing_factor_down"`
+	AllowRequestKeyframe      bool    `conf:"allow_request_keyframe"`
+	AllowRqKfByTxD            bool    `conf:"allow_rq_kf_by_tx_d"`
+	CheckXtxPeriodMs          int     `conf:"check_xtx_period_ms"`
+	RequestKeyframeIntervalMs int     `conf:"request_keyframe_interval_ms"`
+	IdrEveryChange            bool    `conf:"idr_every_change"`
+	RoiFocusMode              int     `conf:"roi_focus_mode"`
+	AllowDynamicFec           bool    `conf:"allow_dynamic_fec"`
+	FecKAdjust                int     `conf:"fec_k_adjust"`
+	SpikeFixDynamicFec        bool    `conf:"spike_fix_dynamic_fec"`
+	AllowSpikeFixFps          bool    `conf:"allow_spike_fix_fps"`
+	AllowXtxReduceBitrate     bool    `conf:"allow_xtx_reduce_bitrate"`
+	XtxReduceBitrateFactor    float64 `conf:"xtx_reduce_bitrate_factor"`
+	OsdLevel                  int     `conf:"osd_level"`
+	MultiplyFontSizeBy        int     `conf:"multiply_font_size_by"`
+
 	// Command templates (strings)
-	PowerCommandTemplate     string `conf:"powerCommandTemplate"`
-	FpsCommandTemplate       string `conf:"fpsCommandTemplate"`
-	QpDeltaCommandTemplate   string `conf:"qpDeltaCommandTemplate"`
-	McsCommandTemplate       string `conf:"mcsCommandTemplate"`
-	BitrateCommandTemplate   string `conf:"bitrateCommandTemplate"`
-	GopCommandTemplate       string `conf:"gopCommandTemplate"`
-	FecCommandTemplate       string `conf:"fecCommandTemplate"`
-	RoiCommandTemplate       string `conf:"roiCommandTemplate"`
-	IdrCommandTemplate       string `conf:"idrCommandTemplate"`
-	CustomOSD                string `conf:"customOSD"`
+	PowerCommandTemplate   string `conf:"powerCommandTemplate"`
+	FpsCommandTemplate     string `conf:"fpsCommandTemplate"`
+	QpDeltaCommandTemplate string `conf:"qpDeltaCommandTemplate"`
+	McsCommandTemplate     string `conf:"mcsCommandTemplate"`
+	BitrateCommandTemplate string `conf:"bitrateCommandTemplate"`
+	GopCommandTemplate     string `conf:"gopCommandTemplate"`
+	FecCommandTemplate     string `conf:"fecCommandTemplate"`
+	RoiCommandTemplate     string `conf:"roiCommandTemplate"`
+	IdrCommandTemplate     string `conf:"idrCommandTemplate"`
+	CustomOSD              string `conf:"customOSD"`
 }
 
 // API Request/Response Models
@@ -217,12 +217,11 @@ type VideoSettings struct {
 }
 
 type CameraSettings struct {
-	Exposure   *string `json:"exposure"` // simplified
-	Contrast   *int    `json:"contrast"`
-	Saturation *int    `json:"saturation"`
-	Flip       *bool   `json:"flip"`
-	Mirror     *bool   `json:"mirror"`
-	Rotate     *int    `json:"rotate"`
+	Contrast   *int  `json:"contrast"`
+	Saturation *int  `json:"saturation"`
+	Flip       *bool `json:"flip"`
+	Mirror     *bool `json:"mirror"`
+	Rotate     *int  `json:"rotate"`
 }
 
 type TelemetrySettings struct {
@@ -238,4 +237,19 @@ type AdaptiveLinkSettings struct {
 	PowerLevel0To4   *int  `json:"power_level_0_to_4"`
 	AllowSpikeFixFps *bool `json:"allow_spike_fix_fps"`
 	OsdLevel         *int  `json:"osd_level"`
+}
+
+type TxProfile struct {
+	RangeStart int    `json:"range_start"`
+	RangeEnd   int    `json:"range_end"`
+	GI         string `json:"gi"`
+	MCS        int    `json:"mcs"`
+	FecK       int    `json:"fec_k"`
+	FecN       int    `json:"fec_n"`
+	Bitrate    int    `json:"bitrate"`
+	Gop        int    `json:"gop"`
+	Pwr        int    `json:"pwr"`
+	RoiQP      string `json:"roi_qp"`
+	Bandwidth  int    `json:"bandwidth"`
+	QpDelta    int    `json:"qp_delta"`
 }

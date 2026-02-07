@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,19 +12,21 @@ import (
 
 // ServiceConfig holds paths to config files
 type ServiceConfig struct {
-	WFBPath      string
-	MajesticPath string
-	AlinkPath    string
-	RcLocalPath  string
+	WFBPath        string
+	MajesticPath   string
+	AlinkPath      string
+	RcLocalPath    string
+	TxProfilesPath string
 }
 
 // NewServiceConfig creates a new config handler with default paths or from env
 func NewServiceConfig() *ServiceConfig {
 	return &ServiceConfig{
-		WFBPath:      getEnv("WFB_PATH", "/etc/wfb.yaml"),
-		MajesticPath: getEnv("MAJESTIC_PATH", "/etc/majestic.yaml"),
-		AlinkPath:    getEnv("ALINK_PATH", "/etc/alink.conf"),
-		RcLocalPath:  getEnv("RC_LOCAL_PATH", "/etc/rc.local"),
+		WFBPath:        getEnv("WFB_PATH", "/etc/wfb.yaml"),
+		MajesticPath:   getEnv("MAJESTIC_PATH", "/etc/majestic.yaml"),
+		AlinkPath:      getEnv("ALINK_PATH", "/etc/alink.conf"),
+		RcLocalPath:    getEnv("RC_LOCAL_PATH", "/etc/rc.local"),
+		TxProfilesPath: getEnv("TXPROFILES_PATH", "/etc/txprofiles.conf"),
 	}
 }
 
@@ -51,22 +54,9 @@ func (s *ServiceConfig) LoadWFB() (*models.WFBConfig, error) {
 
 // SaveWFB saves WFB configuration
 func (s *ServiceConfig) SaveWFB(config *models.WFBConfig) error {
-	data, err := yaml.Marshal(config)
-	if err != nil {
-		return fmt.Errorf("failed to marshal wfb config: %w", err)
+	if err := s.saveYaml(s.WFBPath, config); err != nil {
+		return fmt.Errorf("failed to save wfb config: %w", err)
 	}
-
-	// Write to temp file first
-	tmpPath := s.WFBPath + ".tmp"
-	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write temp wfb config: %w", err)
-	}
-
-	// Rename temp file to actual file (atomic update)
-	if err := os.Rename(tmpPath, s.WFBPath); err != nil {
-		return fmt.Errorf("failed to replace wfb config: %w", err)
-	}
-
 	return nil
 }
 
@@ -87,18 +77,29 @@ func (s *ServiceConfig) LoadMajestic() (*models.MajesticConfig, error) {
 
 // SaveMajestic saves Majestic configuration
 func (s *ServiceConfig) SaveMajestic(config *models.MajesticConfig) error {
-	data, err := yaml.Marshal(config)
-	if err != nil {
-		return fmt.Errorf("failed to marshal majestic config: %w", err)
+	if err := s.saveYaml(s.MajesticPath, config); err != nil {
+		return fmt.Errorf("failed to save majestic config: %w", err)
+	}
+	return nil
+}
+
+func (s *ServiceConfig) saveYaml(path string, config interface{}) error {
+	var b bytes.Buffer
+	enc := yaml.NewEncoder(&b)
+	enc.SetIndent(2)
+	if err := enc.Encode(config); err != nil {
+		return fmt.Errorf("failed to encode config: %w", err)
 	}
 
-	tmpPath := s.MajesticPath + ".tmp"
-	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write temp majestic config: %w", err)
+	// Write to temp file first
+	tmpPath := path + ".tmp"
+	if err := os.WriteFile(tmpPath, b.Bytes(), 0644); err != nil {
+		return fmt.Errorf("failed to write temp config: %w", err)
 	}
 
-	if err := os.Rename(tmpPath, s.MajesticPath); err != nil {
-		return fmt.Errorf("failed to replace majestic config: %w", err)
+	// Rename temp file to actual file (atomic update)
+	if err := os.Rename(tmpPath, path); err != nil {
+		return fmt.Errorf("failed to replace config: %w", err)
 	}
 
 	return nil

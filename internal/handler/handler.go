@@ -31,7 +31,7 @@ func (h *Handler) UpdateRadio(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	if err := h.service.UpdateRadioSettings(&settings); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -56,7 +56,7 @@ func (h *Handler) UpdateVideo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	if err := h.service.UpdateVideoSettings(&settings); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -127,6 +127,29 @@ func (h *Handler) UpdateAdaptiveLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.UpdateAdaptiveLinkSettings(&settings); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) GetTxProfiles(w http.ResponseWriter, r *http.Request) {
+	profiles, err := h.service.GetTxProfiles()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(profiles)
+}
+
+func (h *Handler) UpdateTxProfiles(w http.ResponseWriter, r *http.Request) {
+	var profiles []models.TxProfile
+	if err := json.NewDecoder(r.Body).Decode(&profiles); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.UpdateTxProfiles(profiles); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

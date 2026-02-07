@@ -1,19 +1,19 @@
 package service
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/openipc/ezconfig/internal/config"
 	"github.com/openipc/ezconfig/internal/models"
 )
 
 type ConfigService struct {
-	config     *config.ServiceConfig
-	initDPath  string
+	config    *config.ServiceConfig
+	initDPath string
 }
 
 func NewConfigService(cfg *config.ServiceConfig) *ConfigService {
@@ -76,7 +76,8 @@ func (s *ConfigService) UpdateRadioSettings(settings *models.RadioSettings) erro
 		return err
 	}
 
-	return s.restartService("S98wifibroadcast")
+	s.restartWFBAsync()
+	return nil
 }
 
 // --- Video (Majestic) ---
@@ -86,7 +87,7 @@ func (s *ConfigService) GetVideoSettings() (*models.VideoSettings, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &models.VideoSettings{
 		Resolution: &conf.Video0.Size,
 		Fps:        &conf.Video0.Fps,
@@ -107,6 +108,7 @@ func (s *ConfigService) UpdateVideoSettings(settings *models.VideoSettings) erro
 	}
 	if settings.Fps != nil {
 		conf.Video0.Fps = *settings.Fps
+		conf.Isp.Exposure = 1000 / conf.Video0.Fps
 	}
 	if settings.Codec != nil {
 		conf.Video0.Codec = *settings.Codec
@@ -125,7 +127,6 @@ func (s *ConfigService) UpdateVideoSettings(settings *models.VideoSettings) erro
 	return s.restartService("S95majestic")
 }
 
-
 // --- Camera (Majestic) ---
 
 func (s *ConfigService) GetCameraSettings() (*models.CameraSettings, error) {
@@ -134,10 +135,7 @@ func (s *ConfigService) GetCameraSettings() (*models.CameraSettings, error) {
 		return nil, err
 	}
 
-	exposure := "auto" // TODO: Check if majestic supports exposure reading
-
 	return &models.CameraSettings{
-		Exposure:   &exposure,
 		Contrast:   &conf.Image.Contrast,
 		Saturation: &conf.Image.Saturation,
 		Flip:       &conf.Image.Flip,
@@ -145,7 +143,6 @@ func (s *ConfigService) GetCameraSettings() (*models.CameraSettings, error) {
 		Rotate:     &conf.Image.Rotate,
 	}, nil
 }
-
 
 func (s *ConfigService) UpdateCameraSettings(settings *models.CameraSettings) error {
 	conf, err := s.config.LoadMajestic()
@@ -172,7 +169,7 @@ func (s *ConfigService) UpdateCameraSettings(settings *models.CameraSettings) er
 	if err := s.config.SaveMajestic(conf); err != nil {
 		return err
 	}
-	
+
 	// Majestic usually needs restart or reload for image settings
 	return s.restartService("S95majestic")
 }
@@ -184,7 +181,7 @@ func (s *ConfigService) GetTelemetrySettings() (*models.TelemetrySettings, error
 	if err != nil {
 		return nil, err
 	}
-	
+
 	baudRate := 115200 // Placeholder
 
 	return &models.TelemetrySettings{
@@ -212,7 +209,8 @@ func (s *ConfigService) UpdateTelemetrySettings(settings *models.TelemetrySettin
 		return err
 	}
 
-	return s.restartService("S98wifibroadcast")
+	s.restartWFBAsync()
+	return nil
 }
 
 // --- Adaptive Link (Alink) ---
@@ -228,7 +226,7 @@ func (s *ConfigService) GetAdaptiveLinkSettings() (*models.AdaptiveLinkSettings,
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Map AlinkConfig to AdaptiveLinkSettings (API model)
 	return &models.AdaptiveLinkSettings{
 		Enabled:          &enabled,
@@ -270,24 +268,31 @@ func (s *ConfigService) UpdateAdaptiveLinkSettings(settings *models.AdaptiveLink
 	}
 
 	// 4. Manage Enabled state in rc.local and process
+	shouldBeEnabled := false
 	if settings.Enabled != nil {
-		if *settings.Enabled {
-			if err := s.enableAlinkInRcLocal(); err != nil {
-				return err
-			}
-			// Start process if not running (simplified: just run it, assuming it handles multiple instances or we check)
-			// User said: Start is "alink_drone &"
-			// Better: kill existing then start to ensure clean state or config reload
-			_ = s.killAlinkProcess()
-			return s.startAlinkProcess()
-		} else {
-			if err := s.disableAlinkInRcLocal(); err != nil {
-				return err
-			}
-			return s.killAlinkProcess()
+		shouldBeEnabled = *settings.Enabled
+	} else {
+		// If not specified in request, check current state
+		var err error
+		shouldBeEnabled, err = s.isAlinkEnabledInRcLocal()
+		if err != nil {
+			return err
 		}
 	}
-	return nil
+
+	if shouldBeEnabled {
+		if err := s.enableAlinkInRcLocal(); err != nil {
+			return err
+		}
+		// Always restart if enabled, to apply new config
+		_ = s.killAlinkProcess()
+		return s.startAlinkProcess()
+	} else {
+		if err := s.disableAlinkInRcLocal(); err != nil {
+			return err
+		}
+		return s.killAlinkProcess()
+	}
 }
 
 // Helper functions for Alink
@@ -308,18 +313,22 @@ func (s *ConfigService) enableAlinkInRcLocal() error {
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	
+
 	text := string(content)
 	if strings.Contains(text, "alink_drone") {
 		return nil // Already enabled
 	}
 
-	// Append to rc.local
-	// Ensure newline logic
-	if len(text) > 0 && !strings.HasSuffix(text, "\n") {
-		text += "\n"
+	// Insert before exit 0 if present
+	if idx := strings.LastIndex(text, "exit 0"); idx != -1 {
+		text = text[:idx] + "alink_drone &\n" + text[idx:]
+	} else {
+		// Append to rc.local
+		if len(text) > 0 && !strings.HasSuffix(text, "\n") {
+			text += "\n"
+		}
+		text += "alink_drone &\n"
 	}
-	text += "alink_drone &\n"
 
 	// Ensure rc.local is executable if we are creating it
 	if err := os.WriteFile(s.config.RcLocalPath, []byte(text), 0755); err != nil {
@@ -362,29 +371,58 @@ func (s *ConfigService) startAlinkProcess() error {
 
 func (s *ConfigService) killAlinkProcess() error {
 	// Pkill is safer
-	cmd := exec.Command("pkill", "alink_drone")
+	cmd := exec.Command("killall", "-9", "alink_drone")
 	if s.initDPath != "/etc/init.d/" {
-         // Testing mode
+		// Testing mode
 		cmd = exec.Command("sh", "-c", "echo 'Killing alink_drone'")
 	}
 	return cmd.Run()
 }
 
-
 // --- System ---
 
-func (s *ConfigService) restartService(name string) error {
-	cmd := exec.Command(filepath.Join(s.initDPath, name), "restart")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to restart service %s: %w", name, err)
-	}
-	return nil
+func (s *ConfigService) runServiceCommand(name, action string) error {
+	cmd := exec.Command(filepath.Join(s.initDPath, name), action)
+	return cmd.Run()
 }
 
-func (s *ConfigService) stopService(name string) error {
-	cmd := exec.Command(filepath.Join(s.initDPath, name), "stop")
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to stop service %s: %w", name, err)
+func (s *ConfigService) restartService(name string) error {
+	return s.runServiceCommand(name, "restart")
+}
+
+func (s *ConfigService) restartWFBAsync() {
+	go func() {
+		// Wait a bit to ensure API response is sent
+		time.Sleep(1 * time.Second)
+
+		// S98wifibroadcast doesn't have restart, so stop then start
+		_ = s.runServiceCommand("S98wifibroadcast", "stop")
+		time.Sleep(1 * time.Second)
+		_ = s.runServiceCommand("S98wifibroadcast", "start")
+	}()
+}
+
+// --- TxProfiles ---
+
+func (s *ConfigService) GetTxProfiles() ([]models.TxProfile, error) {
+	return s.config.LoadTxProfiles()
+}
+
+func (s *ConfigService) UpdateTxProfiles(profiles []models.TxProfile) error {
+	if err := s.config.SaveTxProfiles(profiles); err != nil {
+		return err
 	}
+
+	// Restart alink if enabled to apply new profiles
+	enabled, err := s.isAlinkEnabledInRcLocal()
+	if err != nil {
+		return err
+	}
+
+	if enabled {
+		_ = s.killAlinkProcess()
+		return s.startAlinkProcess()
+	}
+
 	return nil
 }

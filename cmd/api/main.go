@@ -12,16 +12,16 @@ import (
 func main() {
 	// Initialize Config
 	cfg := config.NewServiceConfig()
-	
+
 	// Initialize Service
 	svc := service.NewConfigService(cfg)
-	
+
 	// Initialize Handler
 	h := handler.NewHandler(svc)
-	
+
 	// Setup Routes
 	mux := http.NewServeMux()
-	
+
 	// Radio
 	mux.HandleFunc("/api/v1/radio", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -33,7 +33,7 @@ func main() {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
 	})
-	
+
 	// Video
 	mux.HandleFunc("/api/v1/video", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -80,6 +80,24 @@ func main() {
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
+	})
+
+	// TxProfiles
+	mux.HandleFunc("/api/v1/txprofiles", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			h.GetTxProfiles(w, r)
+		case http.MethodPost:
+			h.UpdateTxProfiles(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	// Ping
+	mux.HandleFunc("/api/v1/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("pong"))
 	})
 
 	// Start Server
