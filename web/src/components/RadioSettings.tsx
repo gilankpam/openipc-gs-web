@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Stack, Slider, Text, NumberInput, Select, Loader, Group } from '@mantine/core';
 import type { RadioSettings as RadioSettingsType } from '../types';
+import { fetchWithTimeout } from '../utils/api';
 
 interface RadioSettingsProps {
     alinkEnabled: boolean;
@@ -43,7 +44,7 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const radioRes = await fetch('/api/v1/radio');
+                const radioRes = await fetchWithTimeout('/api/v1/radio');
                 if (!radioRes.ok) throw new Error('Network response was not ok');
                 const radioData = await radioRes.json();
 
@@ -61,7 +62,7 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
 
     const saveSettings = (newSettings: RadioSettingsType) => {
         setSaving(true);
-        fetch('/api/v1/radio', {
+        fetchWithTimeout('/api/v1/radio', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newSettings),

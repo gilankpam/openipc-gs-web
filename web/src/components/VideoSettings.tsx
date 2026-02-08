@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Stack, NumberInput, Select, Loader, Text } from '@mantine/core';
 import type { VideoSettings as VideoSettingsType } from '../types';
+import { fetchWithTimeout } from '../utils/api';
 
 export function VideoSettings() {
     const [settings, setSettings] = useState<VideoSettingsType | null>(null);
@@ -11,7 +12,7 @@ export function VideoSettings() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const videoRes = await fetch('/api/v1/video');
+                const videoRes = await fetchWithTimeout('/api/v1/video');
                 if (!videoRes.ok) throw new Error('Network response was not ok');
                 const videoData = await videoRes.json();
 
@@ -29,7 +30,7 @@ export function VideoSettings() {
 
     const saveSettings = (newSettings: VideoSettingsType) => {
         setSaving(true);
-        fetch('/api/v1/video', {
+        fetchWithTimeout('/api/v1/video', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newSettings),

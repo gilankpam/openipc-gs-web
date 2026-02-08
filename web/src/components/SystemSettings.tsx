@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Stack, Switch, Loader, Text, Select } from '@mantine/core';
 import type { AdaptiveLinkSettings } from '../types';
+import { fetchWithTimeout } from '../utils/api';
 
 interface SystemSettingsProps {
     onAlinkChange?: (enabled: boolean) => void;
@@ -15,7 +16,7 @@ export function SystemSettings({ onAlinkChange }: SystemSettingsProps) {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const alinkRes = await fetch('/api/v1/adaptive-link');
+                const alinkRes = await fetchWithTimeout('/api/v1/adaptive-link');
                 if (!alinkRes.ok) throw new Error('Network response was not ok');
                 const alinkData = await alinkRes.json();
 
@@ -34,7 +35,7 @@ export function SystemSettings({ onAlinkChange }: SystemSettingsProps) {
 
     const saveAlinkSettings = (newSettings: AdaptiveLinkSettings) => {
         setSaving(true);
-        fetch('/api/v1/adaptive-link', {
+        fetchWithTimeout('/api/v1/adaptive-link', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newSettings),

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Stack, Paper, Text, Group, Button, Grid, NumberInput, Select, TextInput, Divider, Loader, Box, Tooltip } from '@mantine/core';
 import { IconDeviceFloppy, IconPlus, IconTrash, IconRotateClockwise } from '@tabler/icons-react';
 import type { TxProfile } from '../types';
+import { fetchWithTimeout } from '../utils/api';
 
 const MIN_RANGE = 999;
 const MAX_RANGE = 2000;
@@ -39,7 +40,7 @@ export function TxProfilesSettings() {
 
     const fetchProfiles = async () => {
         try {
-            const res = await fetch('/api/v1/txprofiles');
+            const res = await fetchWithTimeout('/api/v1/txprofiles');
             if (!res.ok) throw new Error('Failed to fetch profiles');
             let data: TxProfile[] = await res.json();
 
@@ -76,7 +77,7 @@ export function TxProfilesSettings() {
     const handleSave = async () => {
         setSaving(true);
         try {
-            const res = await fetch('/api/v1/txprofiles', {
+            const res = await fetchWithTimeout('/api/v1/txprofiles', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(profiles),

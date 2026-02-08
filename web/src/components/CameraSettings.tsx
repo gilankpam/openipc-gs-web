@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Stack, Switch, Group, Loader, Text, Slider } from '@mantine/core';
 import type { CameraSettings as CameraSettingsType } from '../types';
+import { fetchWithTimeout } from '../utils/api';
 
 export function CameraSettings() {
     const [settings, setSettings] = useState<CameraSettingsType | null>(null);
@@ -11,7 +12,7 @@ export function CameraSettings() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const cameraRes = await fetch('/api/v1/camera');
+                const cameraRes = await fetchWithTimeout('/api/v1/camera');
                 if (!cameraRes.ok) throw new Error('Network response was not ok');
                 const cameraData = await cameraRes.json();
 
@@ -29,7 +30,7 @@ export function CameraSettings() {
 
     const saveSettings = (newSettings: CameraSettingsType) => {
         setSaving(true);
-        fetch('/api/v1/camera', {
+        fetchWithTimeout('/api/v1/camera', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newSettings),

@@ -6,6 +6,7 @@ import { VideoSettings } from './VideoSettings';
 import { CameraSettings } from './CameraSettings';
 import { SystemSettings } from './SystemSettings';
 import { TxProfilesSettings } from './TxProfilesSettings';
+import { fetchWithTimeout } from '../utils/api';
 
 interface ConfigPanelProps {
     isConnected: boolean;
@@ -17,7 +18,7 @@ export function ConfigPanel({ isConnected }: ConfigPanelProps) {
 
     useEffect(() => {
         if (isConnected) {
-            fetch('/api/v1/adaptive-link')
+            fetchWithTimeout('/api/v1/adaptive-link')
                 .then(res => res.json())
                 .then(data => setAlinkEnabled(data.enabled))
                 .catch(console.error);
