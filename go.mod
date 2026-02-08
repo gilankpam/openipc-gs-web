@@ -1,4 +1,4 @@
-module github.com/openipc/ezconfig
+module github.com/gilankpam/openipc-gs-web
 
 go 1.25.5
 

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/openipc/ezconfig/internal/models"
+	"github.com/gilankpam/openipc-gs-web/internal/models"
 	"gopkg.in/yaml.v3"
 )
 

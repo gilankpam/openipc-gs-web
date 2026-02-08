@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/openipc/ezconfig/internal/models"
+	"github.com/gilankpam/openipc-gs-web/internal/models"
 )
 
 // LoadAlink loads Alink configuration from a key-value file
@@ -20,12 +20,12 @@ func (s *ServiceConfig) LoadAlink() (*models.AlinkConfig, error) {
 	defer file.Close()
 
 	config := &models.AlinkConfig{}
-	
+
 	// Map tags to field map for quick lookup
 	// We need to set values on 'config'
 	v := reflect.ValueOf(config).Elem()
 	t := v.Type()
-	
+
 	tagToField := make(map[string]int)
 	for i := 0; i < t.NumField(); i++ {
 		tag := t.Field(i).Tag.Get("conf")
@@ -80,7 +80,7 @@ func (s *ServiceConfig) SaveAlink(config *models.AlinkConfig) error {
 		if tag == "" {
 			continue
 		}
-		
+
 		val := getFieldValueString(v.Field(i))
 		updates[tag] = val
 	}
@@ -112,7 +112,7 @@ func (s *ServiceConfig) SaveAlink(config *models.AlinkConfig) error {
 		}
 	}
 
-	// Append missing keys 
+	// Append missing keys
 	for i := 0; i < t.NumField(); i++ {
 		tag := t.Field(i).Tag.Get("conf")
 		if tag != "" && !updatedKeys[tag] {

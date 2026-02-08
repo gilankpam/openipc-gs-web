@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/openipc/ezconfig/internal/models"
+	"github.com/gilankpam/openipc-gs-web/internal/models"
 )
 
 type CapturingResponseWriter struct {

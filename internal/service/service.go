@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/openipc/ezconfig/internal/config"
-	"github.com/openipc/ezconfig/internal/models"
+	"github.com/gilankpam/openipc-gs-web/internal/config"
+	"github.com/gilankpam/openipc-gs-web/internal/models"
 )
 
 type ConfigService struct {

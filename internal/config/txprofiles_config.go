@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/openipc/ezconfig/internal/models"
+	"github.com/gilankpam/openipc-gs-web/internal/models"
 )
 
 // LoadTxProfiles loads TxProfiles from the specified file path

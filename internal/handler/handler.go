@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/openipc/ezconfig/internal/models"
-	"github.com/openipc/ezconfig/internal/service"
+	"github.com/gilankpam/openipc-gs-web/internal/models"
+	"github.com/gilankpam/openipc-gs-web/internal/service"
 )
 
 type Handler struct {

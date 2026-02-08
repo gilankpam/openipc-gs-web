@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/openipc/ezconfig/internal/config"
-	"github.com/openipc/ezconfig/internal/handler"
-	"github.com/openipc/ezconfig/internal/service"
+	"github.com/gilankpam/openipc-gs-web/internal/config"
+	"github.com/gilankpam/openipc-gs-web/internal/handler"
+	"github.com/gilankpam/openipc-gs-web/internal/service"
 )
 
 func main() {
