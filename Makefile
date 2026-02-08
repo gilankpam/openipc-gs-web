@@ -1,7 +1,7 @@
 # Makefile for OpenIPC ezconfig
 
 BINARY_NAME := ezconfig
-ENTRY_POINT := cmd/api/main.go
+ENTRY_POINT := cmd/ezconfig/main.go
 
 # Default target
 all: build-air-unit
