@@ -17,7 +17,7 @@ The OpenIPC Air Unit typically runs on ARM architecture. Cross-compile the binar
 
 ```bash
 make build-air-unit
-scp -O ezconfig root@X.X.X.X:/usr/bin/ezconfig
+scp -O output/ezconfig root@X.X.X.X:/usr/bin/ezconfig
 scp -O conf/S99ezconfig root@X.X.X.X:/etc/init.d/
 ```
 
