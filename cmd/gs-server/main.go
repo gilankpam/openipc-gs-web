@@ -11,6 +11,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -182,10 +183,10 @@ func updateLocalConfig(path string, settings models.RadioSettings) (bool, error)
 
 func restartService() error {
 	fmt.Println("Restarting wifibroadcast service...")
-	// cmd := exec.Command("/etc/init.d/S98wifibroadcast", "restart")
-	// output, err := cmd.CombinedOutput()
-	// if err != nil {
-	// 	return fmt.Errorf("failed to restart service: %v, output: %s", err, string(output))
-	// }
+	cmd := exec.Command("/etc/init.d/S98wifibroadcast", "restart")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to restart service: %v, output: %s", err, string(output))
+	}
 	return nil
 }
