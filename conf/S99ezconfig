@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# Start ezconfig
+#
+
+DAEMON=/usr/bin/ezconfig
+PIDFILE=/var/run/ezconfig.pid
+
+start() {
+	printf "Starting ezconfig: "
+	start-stop-daemon -S -b -q -m -p $PIDFILE -x $DAEMON
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+}
+
+stop() {
+	printf "Stopping ezconfig: "
+	start-stop-daemon -K -q -p $PIDFILE
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	restart
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?

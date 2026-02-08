@@ -16,14 +16,16 @@ This is a lightweight Go-based API service designed to run on the OpenIPC Air Un
 The OpenIPC Air Unit typically runs on ARM architecture. Cross-compile the binary:
 
 ```bash
-GOOS=linux GOARCH=arm go build -o ezconfig cmd/api/main.go
+make build-air-unit
+scp -O ezconfig root@X.X.X.X:/usr/bin/ezconfig
+scp -O conf/S99ezconfig root@X.X.X.X:/etc/init.d/
 ```
 
-## Installation & Usage
+Reboot the Air Unit to apply the changes:
 
-1.  Copy the `ezconfig` binary to the Air Unit (e.g., via SCP).
-2.  Make it executable: `chmod +x ezconfig`.
-3.  Run the service: `./ezconfig`.
+```bash
+reboot
+```
 
 ## Ground Station (GS) WebUI
 
