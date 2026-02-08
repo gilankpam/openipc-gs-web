@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gilankpam/openipc-gs-web/internal/air_unit/handler"
+	"github.com/gilankpam/openipc-gs-web/internal/air_unit/service"
 	"github.com/gilankpam/openipc-gs-web/internal/config"
-	"github.com/gilankpam/openipc-gs-web/internal/handler"
-	"github.com/gilankpam/openipc-gs-web/internal/service"
 )
 
 func main() {

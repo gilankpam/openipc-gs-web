@@ -12,7 +12,7 @@ export default function App() {
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
       {/* Video Background */}
-      <VideoPlayer streamUrl="http://10.18.0.1:1984/stream.html?src=wfb" />
+      <VideoPlayer />
 
       {/* Connection Status - Top Left */}
       <Box style={{ position: 'absolute', top: 20, left: 20, zIndex: 100 }}>

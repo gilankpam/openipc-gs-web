@@ -1,4 +1,4 @@
-package gs
+package handler
 
 import (
 	"bytes"

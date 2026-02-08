@@ -10,7 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gilankpam/openipc-gs-web/gs"
+	"github.com/gilankpam/openipc-gs-web/internal/gs/handler"
+	"github.com/gilankpam/openipc-gs-web/internal/gs/service"
 )
 
 func main() {
@@ -19,8 +20,16 @@ func main() {
 		airUnitAddr = flag.String("airunit", "http://192.168.1.10:8080", "Address of the Air Unit API")
 		staticDir   = flag.String("static", "./web/dist", "Directory containing static frontend files")
 		configFile  = flag.String("config", "/etc/wifibroadcast.cfg", "Path to wifibroadcast.cfg")
+		rtpPort     = flag.Int("rtp-port", 5601, "UDP port to receive RTP H265 stream")
 	)
 	flag.Parse()
+
+	// Initialize Streaming Server
+	streamServer := service.NewStreamServer(*rtpPort)
+	if err := streamServer.Start(); err != nil {
+		log.Fatalf("Failed to start streaming server: %v", err)
+	}
+	defer streamServer.Stop()
 
 	// Parse Air Unit URL
 	airUnitURL, err := url.Parse(*airUnitAddr)
@@ -38,7 +47,7 @@ func main() {
 	}
 
 	// Initialize Radio Handler
-	radioHandler := gs.NewRadioHandler(proxy, *configFile)
+	radioHandler := handler.NewRadioHandler(proxy, *configFile)
 
 	// Serve Static Files or Proxy API
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +56,11 @@ func main() {
 
 		// Check if it's an API request
 		if strings.HasPrefix(r.URL.Path, "/api/") {
+			// WebRTC signaling endpoint
+			if r.URL.Path == "/api/v1/stream/offer" {
+				streamServer.HandleSignaling(w, r)
+				return
+			}
 			// Special handling for Radio Settings update
 			if r.URL.Path == "/api/v1/radio" {
 				radioHandler.ServeHTTP(w, r)
