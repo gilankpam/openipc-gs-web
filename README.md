@@ -25,6 +25,43 @@ GOOS=linux GOARCH=arm go build -o ezconfig cmd/api/main.go
 2.  Make it executable: `chmod +x ezconfig`.
 3.  Run the service: `./ezconfig`.
 
+## Ground Station (GS) WebUI
+
+The EZConfig system includes a Ground Station WebUI that acts as a frontend for the Air Unit API. It runs on the Ground Station (e.g., Raspberry Pi, Laptop) and proxies requests to the Air Unit.
+
+### 1. Build the Frontend
+
+Requires Node.js and npm.
+
+```bash
+cd web
+npm install
+npm run build
+```
+
+This will generate static files in `web/dist`.
+
+### 2. Build the GS Server
+
+```bash
+go build -o gs-server cmd/gs-server/main.go
+```
+
+### 3. Run the GS Server
+
+Run the `gs-server` on your Ground Station, pointing it to the Air Unit's IP address:
+
+```bash
+./gs-server -airunit http://192.168.1.10:8080 -listen :8081 -static ./web/dist
+```
+
+- `-airunit`: URL of the Air Unit API (default: `http://192.168.1.10:8080`).
+- `-listen`: Address to listen on (default: `:8081`).
+- `-static`: Path to the compiled frontend files (default: `./web/dist`).
+- `-config`: Path to the local `wifibroadcast.cfg` file (default: `/etc/wifibroadcast.cfg`). This is used to update local radio settings when changed via the WebUI.
+
+Access the WebUI in your browser at `http://localhost:8081`.
+
 ## API Endpoints
 
 ### Radio (`/api/v1/radio`)
