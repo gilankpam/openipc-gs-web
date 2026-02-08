@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"log"
 	"net/http"
@@ -49,6 +50,11 @@ func main() {
 	// Initialize Radio Handler
 	radioHandler := handler.NewRadioHandler(proxy, *configFile)
 
+	// Initialize Stats Service
+	statsService := service.NewWFBStatsService()
+	statsService.Start()
+	defer statsService.Stop()
+
 	// Serve Static Files or Proxy API
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Log request
@@ -61,11 +67,25 @@ func main() {
 				streamServer.HandleSignaling(w, r)
 				return
 			}
-			// Special handling for Radio Settings update
+			// Radio Settings update
 			if r.URL.Path == "/api/v1/radio" {
 				radioHandler.ServeHTTP(w, r)
 				return
 			}
+			// WFB Stats
+			if r.URL.Path == "/api/v1/stats" {
+				stats, err := statsService.GetStats()
+				if err != nil {
+					log.Printf("Error getting stats: %v", err)
+					http.Error(w, "Failed to get stats", http.StatusInternalServerError)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(stats)
+				return
+			}
+
+			// Proxy other requests to Air Unit
 			proxy.ServeHTTP(w, r)
 			return
 		}

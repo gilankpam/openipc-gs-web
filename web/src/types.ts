@@ -48,4 +48,21 @@ export interface AdaptiveLinkSettings {
     osd_level: number;
 }
 
+export interface WFBStats {
+    rssi: number[];
+    snr: number[];
+    video_packets_per_sec: number;
+    fec_packets_per_sec: number;
+    lost_packets_per_sec: number;
+    bad_blocks_per_sec: number;
+    total_packets: number;
+    total_lost: number;
 
+    // Transmission Info
+    frequency: number;
+    mcs_index: number;
+    bandwidth: number;
+    fec_k: number;
+    fec_n: number;
+    link_flow_bytes_per_sec: number;
+}

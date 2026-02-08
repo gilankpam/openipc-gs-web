@@ -3,6 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconWifi, IconWifiOff, IconSettings } from '@tabler/icons-react'; // Removed unused IconX
 import { VideoPlayer } from './components/VideoPlayer';
 import { ConfigPanel } from './components/ConfigPanel';
+import { WFBStats } from './components/WFBStats';
 import { useConnectionStatus } from './hooks/useConnectionStatus';
 
 export default function App() {
@@ -26,6 +27,9 @@ export default function App() {
           </div>
         </Tooltip>
       </Box>
+
+      {/* WFB Stats - Bottom Left (handled by component absolute positioning) */}
+      <WFBStats />
 
       {/* Settings Button - Top Right */}
       <Box style={{ position: 'absolute', top: 20, right: 20, zIndex: 100 }}>
