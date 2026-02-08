@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Stack, Slider, Text, NumberInput, Select, Loader, Group } from '@mantine/core';
+import { Stack, Slider, Text, NumberInput, Select, Loader, Group, Alert } from '@mantine/core';
 import type { RadioSettings as RadioSettingsType } from '../types';
 import { fetchWithTimeout } from '../utils/api';
 
@@ -40,14 +40,18 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
     const [connectionError, setConnectionError] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isLocalOnly, setIsLocalOnly] = useState(false);
 
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const radioRes = await fetchWithTimeout('/api/v1/radio');
+                const radioRes = await fetchWithTimeout('/api/v1/radio', { timeout: 5000 });
                 if (!radioRes.ok) throw new Error('Network response was not ok');
-                const radioData = await radioRes.json();
 
+                const dataSource = radioRes.headers.get('X-GS-Data-Source');
+                setIsLocalOnly(dataSource === 'local');
+
+                const radioData = await radioRes.json();
                 setSettings(radioData);
                 setConnectionError(false);
             } catch (err) {
@@ -66,7 +70,14 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newSettings),
+            timeout: 5000,
         })
+            .then((res) => {
+                if (res.ok) {
+                    const dataSource = res.headers.get('X-GS-Data-Source');
+                    setIsLocalOnly(dataSource === 'local');
+                }
+            })
             .finally(() => setSaving(false));
     };
 
@@ -88,9 +99,20 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
     const safeFecN = settings?.fec_n || 0;
 
     const isDisabled = saving || connectionError;
+    // If local only, we enable channel but disable others?
+    // Actually, if isLocalOnly is true, connectionError should be false (we handle it).
+    // So 'isDisabled' will be false (unless saving).
+    // We want to specifically disable non-channel inputs if isLocalOnly is true.
 
     return (
         <Stack gap="md">
+            {isLocalOnly && (
+                <Alert variant="light" color="orange" title="Air Unit Not Connected">
+                    Settings are currently being saved to the Ground Station only.
+                    Only Channel changes are allowed and will take effect after a local service restart.
+                </Alert>
+            )}
+
             <div>
                 <Text size="sm" fw={500} mb={3}>Channel</Text>
                 <Select
@@ -106,7 +128,7 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
                             : [])
                     ]}
                     searchable
-                    disabled={isDisabled}
+                    disabled={isDisabled} // Always allow unless saving or fully errored
                     comboboxProps={{ zIndex: 2100 }}
                 />
             </div>
@@ -117,7 +139,7 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
                     value={safeBandwidth ? safeBandwidth.toString() : ''}
                     onChange={(val) => handleUpdate('bandwidth', Number(val))}
                     data={['20', '40', '80']}
-                    disabled={isDisabled}
+                    disabled={isDisabled || isLocalOnly}
                     comboboxProps={{ zIndex: 2100 }}
                 />
             </div>
@@ -137,7 +159,7 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
                                 { value: 30, label: '30' },
                                 { value: 50, label: '50' },
                             ]}
-                            disabled={isDisabled}
+                            disabled={isDisabled || isLocalOnly}
                         />
                     </div>
 
@@ -148,7 +170,7 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
                                 value={safeMcsIndex}
                                 onChange={(val) => setSettings(prev => prev ? ({ ...prev, mcs_index: Number(val) }) : null)}
                                 onBlur={() => settings && saveSettings(settings)}
-                                disabled={isDisabled}
+                                disabled={isDisabled || isLocalOnly}
                             />
                         </div>
                         <div>
@@ -157,7 +179,7 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
                                 value={safeFecK}
                                 onChange={(val) => setSettings(prev => prev ? ({ ...prev, fec_k: Number(val) }) : null)}
                                 onBlur={() => settings && saveSettings(settings)}
-                                disabled={isDisabled}
+                                disabled={isDisabled || isLocalOnly}
                             />
                         </div>
                         <div>
@@ -166,7 +188,7 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
                                 value={safeFecN}
                                 onChange={(val) => setSettings(prev => prev ? ({ ...prev, fec_n: Number(val) }) : null)}
                                 onBlur={() => settings && saveSettings(settings)}
-                                disabled={isDisabled}
+                                disabled={isDisabled || isLocalOnly}
                             />
                         </div>
                     </Group>
