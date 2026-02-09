@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Stack, Paper, Text, Group, Button, Grid, NumberInput, Select, TextInput, Divider, Loader, Box, Tooltip } from '@mantine/core';
-import { IconDeviceFloppy, IconPlus, IconTrash, IconRotateClockwise } from '@tabler/icons-react';
+import { Stack, Paper, Text, Group, Button, Grid, NumberInput, Select, TextInput, Divider, Loader, Box, Tooltip, ActionIcon } from '@mantine/core';
+import { IconDeviceFloppy, IconPlus, IconTrash, IconRotateClockwise, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import type { TxProfile } from '../types';
 import { fetchWithTimeout } from '../utils/api';
 
@@ -349,7 +349,25 @@ export function TxProfilesSettings() {
                 <Paper p="md" withBorder>
                     <Stack gap="xs">
                         <Group justify="space-between">
-                            <Text fw={700}>Selected Segment: {selectedProfile.range_start} - {selectedProfile.range_end}</Text>
+                            <Group gap="xs" align="center">
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="gray"
+                                    onClick={() => setSelectedIndex((selectedIndex ?? 0) - 1)}
+                                    disabled={selectedIndex === null || selectedIndex <= 0}
+                                >
+                                    <IconChevronLeft size={16} />
+                                </ActionIcon>
+                                <Text fw={700}>Selected Segment: {selectedProfile.range_start} - {selectedProfile.range_end}</Text>
+                                <ActionIcon
+                                    variant="subtle"
+                                    color="gray"
+                                    onClick={() => setSelectedIndex((selectedIndex ?? 0) + 1)}
+                                    disabled={selectedIndex === null || selectedIndex >= profiles.length - 1}
+                                >
+                                    <IconChevronRight size={16} />
+                                </ActionIcon>
+                            </Group>
                             <Group gap="xs">
                                 <Button
                                     size="xs"
