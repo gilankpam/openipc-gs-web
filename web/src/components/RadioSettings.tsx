@@ -166,11 +166,12 @@ export function RadioSettings({ alinkEnabled }: RadioSettingsProps) {
                     <Group grow>
                         <div>
                             <Text size="sm" fw={500} mb={3}>MCS Index</Text>
-                            <NumberInput
-                                value={safeMcsIndex}
-                                onChange={(val) => setSettings(prev => prev ? ({ ...prev, mcs_index: Number(val) }) : null)}
-                                onBlur={() => settings && saveSettings(settings)}
+                            <Select
+                                value={safeMcsIndex.toString()}
+                                onChange={(val) => handleUpdate('mcs_index', Number(val))}
+                                data={['0', '1', '2', '3', '4', '5', '6', '7']}
                                 disabled={isDisabled || isLocalOnly}
+                                comboboxProps={{ zIndex: 2100 }}
                             />
                         </div>
                         <div>
