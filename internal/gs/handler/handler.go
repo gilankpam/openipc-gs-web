@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,6 +13,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/gilankpam/openipc-gs-web/internal/models"
 )
@@ -75,7 +77,9 @@ func (h *RadioHandler) handleGet(w http.ResponseWriter, r *http.Request) {
 		h.serveLocalConfig(rw)
 	}
 
-	proxyCopy.ServeHTTP(w, r)
+	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+	defer cancel()
+	proxyCopy.ServeHTTP(w, r.WithContext(ctx))
 }
 
 func (h *RadioHandler) serveLocalConfig(w http.ResponseWriter) {
