@@ -1,6 +1,6 @@
 import { ActionIcon, Modal, Tooltip, Box } from '@mantine/core'; // Removed unused imports
-import { useDisclosure } from '@mantine/hooks';
-import { IconWifi, IconWifiOff, IconSettings } from '@tabler/icons-react'; // Removed unused IconX
+import { useDisclosure, useFullscreen } from '@mantine/hooks';
+import { IconWifi, IconWifiOff, IconSettings, IconMaximize, IconMinimize } from '@tabler/icons-react'; // Removed unused IconX
 import { VideoPlayer } from './components/VideoPlayer';
 import { ConfigPanel } from './components/ConfigPanel';
 import { WFBStats } from './components/WFBStats';
@@ -8,6 +8,7 @@ import { useConnectionStatus } from './hooks/useConnectionStatus';
 
 export default function App() {
   const [opened, { open, close }] = useDisclosure(false);
+  const { toggle, fullscreen } = useFullscreen();
   const isConnected = useConnectionStatus();
 
   return (
@@ -41,6 +42,19 @@ export default function App() {
           style={{ filter: 'drop-shadow(0px 0px 4px rgba(0,0,0,0.8))' }}
         >
           <IconSettings size={32} color="white" />
+        </ActionIcon>
+      </Box>
+
+      {/* Fullscreen Button - Bottom Right */}
+      <Box style={{ position: 'absolute', bottom: 20, right: 20, zIndex: 100 }}>
+        <ActionIcon
+          onClick={toggle}
+          variant="transparent"
+          size="xl"
+          aria-label="Toggle Fullscreen"
+          style={{ filter: 'drop-shadow(0px 0px 4px rgba(0,0,0,0.8))' }}
+        >
+          {fullscreen ? <IconMinimize size={32} color="white" /> : <IconMaximize size={32} color="white" />}
         </ActionIcon>
       </Box>
 
